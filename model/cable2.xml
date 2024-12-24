@@ -1,0 +1,44 @@
+<mujoco model="Cable">
+  <include file="scene.xml"/>
+  <extension>
+    <plugin plugin="mujoco.elasticity.cable"/>
+  </extension>
+  <option integrator="implicitfast"/>
+
+  <worldbody>
+    <body name="cable_start" pos="0 0 .6" mocap="true">
+      <inertial pos="0 0 0" quat="0 0 0 1" mass="0.1" diaginertia="0.1 0.1 0.1" />
+      <geom  size=".01"/>
+      <composite prefix="cable_" type="cable" curve="s" size="1" count="101"  offset="0.0 0 0" initial="ball">
+        <plugin plugin="mujoco.elasticity.cable">
+          <config key="twist" value="1e5"/>
+          <config key="bend" value="4e5"/>
+          <config key="vmax" value="0.05"/>
+          <config key="flat" value="true" />
+        </plugin>
+        <joint kind="main" damping=".015"/>
+        <geom type="capsule" size=".005" rgba=".8 .2 .1 1" condim="1"/>
+      </composite>
+    </body>
+
+    <body name="cable_end" pos="1 0 .6" mocap="true">
+      <inertial pos="0 0 0" quat="0 0 0 1" mass="0.1" diaginertia="0.1 0.1 0.1" />
+      <geom size=".01"/>
+    </body>
+
+
+  </worldbody>
+  <equality>
+    <!-- 将 cable_end 与 cable_B_last 通过焊接约束，且设置很强的阻尼和阻尼比，防止脱落 -->
+    <weld name="right_boundary" body1="cable_B_last" body2="cable_end" anchor="0 0 0" 
+          solimp="0.95 0.99 0.0001" solref="0.0001 1"/>
+  </equality>
+
+  <contact>
+    <!-- 排除 cable_B_last 和 cable_end 之间的碰撞 -->
+    <exclude body1="cable_B_last" body2="cable_end"/>
+    <!-- 排除 cable_B_first 和 cable_start 之间的碰撞 -->
+    <exclude body1="cable_B_first" body2="cable_start"/>
+  </contact>
+
+</mujoco>

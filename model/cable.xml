@@ -1,0 +1,32 @@
+<mujoco model="Cable">
+  <!-- 引入场景文件 -->
+  <include file="scene.xml"/>
+  <!-- 添加线缆扩展插件配置 -->
+  <extension>  
+    <plugin plugin="mujoco.elasticity.cable"/>  
+  </extension>
+
+  <!-- 设置积分器为隐式快速积分器，这是目前测试下来比较稳定的线缆仿真积分器 -->
+  <option integrator="implicitfast"/>
+
+  <worldbody> 
+    <!-- 定义电缆组合体，形状为沿 x 轴的直线，长度为1m，共 51 个节点，-->
+    <!-- 初始位置相对世界坐标原点为 [-0.3 0 0.6]，初始节点为无自由度的固定点 -->
+    <composite prefix="cable_" type="cable" curve="s" size="1" 
+               count="51" offset="-.3 0 0.9" initial="none" >  
+      <!-- 设置电缆的弹性属性 -->
+      <plugin plugin="mujoco.elasticity.cable">
+        <!-- 设置扭转刚度为1e7 Pa -->
+        <config key="twist" value="1e7"/>  
+        <!-- 设置弯曲刚度为4e6 Pa -->
+        <config key="bend" value="4e6"/>  
+        <!-- 设置最大可视化应力为0.05 -->
+        <config key="vmax" value="0.05"/>  
+      </plugin>
+      <!-- 主关节设置,阻尼系数0.015 -->
+      <joint kind="main" damping=".015"/>  
+      <!-- 设置线缆半径为0.005m，颜色为红色，并设置摩擦优先级为 1（计算两个物体摩擦式，按优先级大的值计算） -->
+      <geom type="capsule" size=".005" rgba=".8 .2 .1 1" condim="1"/>  
+    </composite>
+  </worldbody>
+</mujoco>
